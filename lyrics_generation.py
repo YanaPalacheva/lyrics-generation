@@ -116,7 +116,7 @@ def generate_lyrics(text_model, text_file):
     markov_model = markov(text_file)
 
     while len(bars) < lyriclength / 9 and count < lyriclength * 2:
-        bar = markov_model.make_sentence(max_overlap_ratio=1, tries=100)
+        bar = markov_model.make_sentence(max_overlap_ratio=.49, tries=100)
         if type(bar) != type(None) and syllables(bar) < 1:
             def get_last_word(bar):
                 last_word = bar.split(" ")[-1]
@@ -258,20 +258,18 @@ def main(depth, train_mode):
     if train_mode == False:
         vectors = compose_rap(bars, rhyme_list, text_file, model)
         rap = vectors_into_song(vectors, bars, rhyme_list)
+        rap_file = "beyonce_depth15.txt"
         f = open(rap_file, "w", encoding='utf-8')
         for bar in rap:
             f.write(bar)
             f.write("\n")
 
 
-depth = 4
+depth = 15
 artist = 'artist2'
 text_file = "beyonce.txt"
-rap_file = "temporary_poem.txt"
 maxsyllables = 10
 train_mode = True
 main(depth, train_mode)
 train_mode = False
 main(depth, train_mode)
-
-
