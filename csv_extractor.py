@@ -11,6 +11,10 @@ def clean_input(songs):
         song = re.sub(r' +', ' ', song)
         # remove all spaces at the beginning and end of the line
         song = re.sub(r'(?<=^) +|(?<=\n) +| +(?=\n)| +(?=&)', '', song)
+        # remove 'x2', etc. from lyrics
+        song = re.sub(r'x\d+', '', song)
+        # remove all verse and chorus declarations
+        song = re.sub(r'\n[vV]erse.+(?=\n)|\n[cC]horus.+(?=\n)', '', song)
         # replace all numbers with their word equivalent
         song = re.sub(r"(\d+)", lambda x: num2words.num2words(int(x.group(0))), song)
         songs[i] = song
