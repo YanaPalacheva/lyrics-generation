@@ -31,3 +31,5 @@ def rhyme_score(line1, line2, alpha = 0.4):
         return 1
     elif last_syllable(word1) == last_syllable(word1):
         return alpha
+    else:
+        return 0
