@@ -33,7 +33,7 @@ def eval(lyrics, parameter, beta = 0.9):
         # add a factor for matching consecutive lines only if the don't match line before (+BAA)
         if i-2 < 0 or parameter(lyrics[i-2], lyrics[i-1]) < parameter(lyrics[i-1], lyrics[i]):
             score += parameter(lyrics[i-1], lyrics[i])
-        if i > 1: # add a factor for lines two apart matching but not with line in between (+beta* ABA)
+        if i > 1: # add a factor for lines two apart matching but not with line in between (+beta * ABA)
             v = parameter(lyrics[i-2], lyrics[i])
             v1 = parameter(lyrics[i-2], lyrics[i-1])
             v2 = parameter(lyrics[i-1], lyrics[i])
