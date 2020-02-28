@@ -43,6 +43,6 @@ def eval(lyrics, aspect, beta = 0.9, a = 0.2, b = 0.1):
             if v > max(v1, v2):
                 score += beta * aspect(lyrics[i-2], lyrics[i])
             else:
-                score += b * aspect(lyrics[i-1], lyrics[i]) # add a factor of 'b' even if they don't differ from line in between
+                score += b * aspect(lyrics[i-2], lyrics[i]) # add a factor of 'b' even if they don't differ from line in between
                 
     return score / len(lyrics)
