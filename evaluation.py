@@ -24,20 +24,25 @@ def syllable_match(line1, line2):
     else:
         return 0
 
-# evaluating the lyrics based on parameter which can be rhyme_score or syllable_match
-def eval(lyrics, parameter, beta = 0.9):
+# evaluating the lyrics based on aspect which can be rhyme_score or syllable_match
+def eval(lyrics, aspect, beta = 0.9, a = 0.2, b = 0.1):
     score = 0
     # We assume lyrics is a list of lines
     n = len(lyrics)
-    for i in range(n): 
+    for i in range(1, n): 
         # add a factor for matching consecutive lines only if the don't match line before (+BAA)
-        if i-2 < 0 or parameter(lyrics[i-2], lyrics[i-1]) < parameter(lyrics[i-1], lyrics[i]):
-            score += parameter(lyrics[i-1], lyrics[i])
+        if i-2 < 0 or aspect(lyrics[i-2], lyrics[i-1]) < aspect(lyrics[i-1], lyrics[i]):
+            score += aspect(lyrics[i-1], lyrics[i])
+        else:
+            score += a * aspect(lyrics[i-1], lyrics[i]) # add a factor of 'a' 
+            
         if i > 1: # add a factor for lines two apart matching but not with line in between (+beta * ABA)
-            v = parameter(lyrics[i-2], lyrics[i])
-            v1 = parameter(lyrics[i-2], lyrics[i-1])
-            v2 = parameter(lyrics[i-1], lyrics[i])
+            v = aspect(lyrics[i-2], lyrics[i])
+            v1 = aspect(lyrics[i-2], lyrics[i-1])
+            v2 = aspect(lyrics[i-1], lyrics[i])
             if v > max(v1, v2):
-                score += beta * parameter(lyrics[i-2], lyrics[i])
+                score += beta * aspect(lyrics[i-2], lyrics[i])
+            else:
+                score += b * aspect(lyrics[i-1], lyrics[i])
                 
     return score / len(lyrics)
