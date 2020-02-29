@@ -1,6 +1,8 @@
 import pandas as pd
 import re
 import num2words
+import os
+from rhymer import Rhymer
 
 
 def clean_input(songs):
@@ -9,6 +11,8 @@ def clean_input(songs):
         song = re.sub(r'[^\w\s-]+', '', song)
         # make sure there is always only one space in a row
         song = re.sub(r' +', ' ', song)
+        # make sure there are no empty strings
+        song = re.sub(r'\n+', '\n', song)
         # remove all spaces at the beginning and end of the line
         song = re.sub(r'(?<=^) +|(?<=\n) +| +(?=\n)| +(?=&)', '', song)
         # remove 'x2', etc. from lyrics
@@ -34,6 +38,10 @@ def create_artist_file(file, artist):
             f.write(song)
 
 
+def create_rhymescheme(artist):
+    rhymer = Rhymer(artist)
+    rhymer.create_rhymescheme()
+
 def create_files():
     artists = ['50-cent', 'elvis-presley', 'freddie-mercury', 'evanescence', 'enya',
                'frank-sinatra', 'depeche-mode', 'ed-sheeran', 'david-bowie']
@@ -51,4 +59,9 @@ def create_files():
         for artist in genres[genre]:
             create_artist_file(file, artist)
 
+dirs = ['data', 'generated_lyrics', 'models', 'rhymes']
+for mydir in dirs:
+    if not os.path.exists(mydir):
+        os.mkdir(mydir)
 create_files()
+# create_rhymescheme('depeche-mode')
