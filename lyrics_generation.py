@@ -1,18 +1,13 @@
 from lyrics_generator import LyricsGenerator
-from utils import create_markov_model
 
 
 artist = 'freddie-mercury'
-genre = 'hip-hop'
-# genre = 'pop'
+genre = 'pop'
 
 # params
 depth = 4
-max_syllables = 10
+max_syllables = 12
 
-lyrics_gen = LyricsGenerator(max_syllables, artist, depth)
+lyrics_gen = LyricsGenerator(max_syllables, artist, depth, old=True)
 lyrics_gen.training_phase()
 lyrics_gen.generating_phase()
-
-
-
