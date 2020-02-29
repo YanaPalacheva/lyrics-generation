@@ -1,33 +1,35 @@
 import numpy as np
 import random
-import pronouncing
-import re
 import os
 from nn_model import LyricsNN
 from utils import create_markov_model, split_file
-
+from rhymer import Rhymer
+from rhymer_old import RhymerOld
 
 class LyricsGenerator:
-    def __init__(self, max_syllables, identifier, nn_depth):
+    def __init__(self, max_syllables, identifier, nn_depth, old=False):
         self.max_syllables = max_syllables
         self.identifier = identifier
-        self.rhyme_filename = f"rhymes/{self.identifier}.rhymes"
+        if old:
+            self.rhymer = RhymerOld(identifier)
+        else:
+            self.rhymer = Rhymer(identifier)
         self.training_file = f"data/{identifier}.txt"
         self.lyrics_model = LyricsNN(nn_depth, identifier)
         self.markov_model = create_markov_model(self.training_file)
         self.original_bars = split_file(self.training_file)
 
     def training_phase(self):
-        rhyme_list = self.rhymeindex(self.original_bars)
+        rhyme_list = self.rhymer.rhymeindex(self.original_bars)
         x_data, y_data = self.build_dataset(self.original_bars, rhyme_list)
         self.lyrics_model.train(x_data, y_data)
 
     def generating_phase(self):
         markov_bars = self.generate_lyrics()
-        if os.path.exists(self.rhyme_filename):
-            rhyme_list = split_file(self.rhyme_filename)
+        if os.path.exists(self.rhymer.rhyme_filename):
+            rhyme_list = split_file(self.rhymer.rhyme_filename)
         else:
-            rhyme_list = self.rhymeindex(markov_bars)
+            print("Rhyme list was not created, please train the model first.")
         vectors = self.create_vectors(rhyme_list)
         lyrics = self.vectors_into_lyrics(vectors, markov_bars, rhyme_list)
         f = open(f"generated_lyrics/{self.identifier}_generated.txt", "w", encoding='utf-8')
@@ -37,8 +39,8 @@ class LyricsGenerator:
 
     def build_dataset(self, lines, rhyme_list):
         dataset = []
-        for line in lines:
-            line_list = [self.syllables(line), self.rhyme(line, rhyme_list)]
+        for i, line in enumerate(lines):
+            line_list = [self.syllables(line), self.rhymer.rhyme(i, line, rhyme_list)]
             dataset.append(line_list)
         x_data = []
         y_data = []
@@ -60,7 +62,7 @@ class LyricsGenerator:
         last_words = []
         # count = 0
 
-        while len(bars) < len(self.original_bars) / 4:
+        while len(bars) < len(self.original_bars) / 21:
             bar = self.markov_model.make_sentence(max_overlap_ratio=0.49, tries=50)
             if bar and self.syllables(bar) < 1:
                 last_word = bar.split(" ")[-1]
@@ -74,11 +76,11 @@ class LyricsGenerator:
         initial_index = random.choice(range(len(self.original_bars) - 1))
         initial_lines = self.original_bars[initial_index:initial_index + 2]
         starting_input = []
-        for line in initial_lines:
-            starting_input.append([self.syllables(line), self.rhyme(line, rhyme_list)])
+        for i, line in enumerate(initial_lines):
+            starting_input.append([self.syllables(line), self.rhymer.rhyme(i, line, rhyme_list)])
         starting_vectors = self.lyrics_model.predict(np.array([starting_input]).flatten().reshape(1, 2, 2))
         lyrics_vectors.append(starting_vectors)
-        for i in range(20):  # number of 2-lines to be generated
+        for i in range(25):  # number of 2-lines to be generated
             lyrics_vectors.append(self.lyrics_model.predict(np.array([lyrics_vectors[-1]]).flatten().reshape(1, 2, 2)))
         return lyrics_vectors
 
@@ -104,9 +106,8 @@ class LyricsGenerator:
             return score
 
         dataset = []
-        print(len(markov_bars))
         for line in markov_bars:
-            line_list = [line, self.syllables(line), self.rhyme(line, rhyme_list)]
+            line_list = [line, self.syllables(line), self.rhymer.rhyme(0, line, rhyme_list, generated=True)]
             dataset.append(line_list)
         lyrics = []
         vector_halves = []
@@ -157,47 +158,3 @@ class LyricsGenerator:
                 if count == 0:
                     count += 1
         return count / self.max_syllables
-
-    def rhymeindex(self, lyrics):
-        rhyme_master_list = []
-        print("Building list of rhymes:")
-        for i in lyrics:
-            word = re.sub(r"\W+", '', i.split(" ")[-1]).lower()
-            rhymeslist = pronouncing.rhymes(word)
-            rhymeslistends = []
-            for i in rhymeslist:
-                rhymeslistends.append(i[-2:])
-            try:
-                rhymescheme = max(set(rhymeslistends), key=rhymeslistends.count)
-            except Exception:
-                rhymescheme = word[-2:]
-            rhyme_master_list.append(rhymescheme)
-        rhyme_master_list = list(set(rhyme_master_list))
-        reverselist = [x[::-1] for x in rhyme_master_list]
-        reverselist = sorted(reverselist)
-        rhymelist = [x[::-1] for x in reverselist]
-
-        print("List of Sorted 2-Letter Rhyme Ends:")
-        print(rhymelist)
-        f = open(self.rhyme_filename, "w", encoding='utf-8')
-        f.write("\n".join(rhymelist))
-        f.close()
-        return rhymelist
-
-    def rhyme(self, line, rhyme_list):
-        word = re.sub(r"\W+", '', line.split(" ")[-1]).lower()
-        rhymeslist = pronouncing.rhymes(word)
-        rhymeslistends = []
-        for i in rhymeslist:
-            rhymeslistends.append(i[-2:])
-        try:
-            rhymescheme = max(set(rhymeslistends), key=rhymeslistends.count)
-        except Exception:
-            rhymescheme = word[-2:]
-        try:
-            float_rhyme = rhyme_list.index(rhymescheme)
-            float_rhyme = float_rhyme / float(len(rhyme_list))
-            return float_rhyme
-        except Exception:
-            float_rhyme = 0
-            return float_rhyme
