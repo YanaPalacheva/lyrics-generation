@@ -1,21 +1,23 @@
 import numpy as np
 import random
 import os
+import pronouncing
 from nn_model import LyricsNN
-from utils import create_markov_model, split_file
+from utils import create_markov_model, split_file, count_syllables
 from rhymer import Rhymer
 from rhymer_old import RhymerOld
 
+
 class LyricsGenerator:
-    def __init__(self, max_syllables, identifier, nn_depth, old=False):
-        self.max_syllables = max_syllables
+    def __init__(self, identifier, params, old=False):
+        self.params = params
         self.identifier = identifier
         if old:
             self.rhymer = RhymerOld(identifier)
         else:
             self.rhymer = Rhymer(identifier)
         self.training_file = f"data/{identifier}.txt"
-        self.lyrics_model = LyricsNN(nn_depth, identifier)
+        self.lyrics_model = LyricsNN(self.params['depth'], identifier)
         self.markov_model = create_markov_model(self.training_file)
         self.original_bars = split_file(self.training_file)
 
@@ -60,10 +62,9 @@ class LyricsGenerator:
     def generate_lyrics(self):
         bars = []
         last_words = []
-        # count = 0
-
-        while len(bars) < len(self.original_bars) / 21:
-            bar = self.markov_model.make_sentence(max_overlap_ratio=0.49, tries=50)
+        overlap = self.params['max_overlap']
+        while len(bars) < self.params['gen_lyrics_len']:
+            bar = self.markov_model.make_sentence(max_overlap_ratio=overlap, tries=50)
             if bar and self.syllables(bar) < 1:
                 last_word = bar.split(" ")[-1]
                 if bar not in bars and last_words.count(last_word) < 3:
@@ -80,7 +81,7 @@ class LyricsGenerator:
             starting_input.append([self.syllables(line), self.rhymer.rhyme(i, line, rhyme_list)])
         starting_vectors = self.lyrics_model.predict(np.array([starting_input]).flatten().reshape(1, 2, 2))
         lyrics_vectors.append(starting_vectors)
-        for i in range(25):  # number of 2-lines to be generated
+        for i in range(self.params['gen_lyrics_len']):  # number of 2-lines to be generated
             lyrics_vectors.append(self.lyrics_model.predict(np.array([lyrics_vectors[-1]]).flatten().reshape(1, 2, 2)))
         return lyrics_vectors
 
@@ -99,7 +100,7 @@ class LyricsGenerator:
         def calculate_score(vector_half, syllables, rhyme, penalty):
             desired_syllables = vector_half[0]
             desired_rhyme = vector_half[1]
-            desired_syllables = desired_syllables * self.max_syllables
+            desired_syllables = desired_syllables * self.params['max_syllables']
             desired_rhyme = desired_rhyme * len(rhyme_list)
             score = 1.0 - abs(float(desired_syllables) - float(syllables)) + abs(
                 float(desired_rhyme) - float(rhyme)) - penalty
@@ -141,20 +142,5 @@ class LyricsGenerator:
         return lyrics
 
     def syllables(self, line):
-        count = 0
-        for word in line.split(" "):
-            vowels = 'aeiouy'
-            word = word.lower().strip(".:;?!")
-            if word:
-                if word[0] in vowels:
-                    count += 1
-                for index in range(1, len(word)):
-                    if word[index] in vowels and word[index - 1] not in vowels:
-                        count += 1
-                if word.endswith('e'):
-                    count -= 1
-                if word.endswith('le'):
-                    count += 1
-                if count == 0:
-                    count += 1
-        return count / self.max_syllables
+        count = count_syllables(line)
+        return count / self.params['max_syllables']

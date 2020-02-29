@@ -1,25 +1,8 @@
-def syllables(line):
-    count = 0
-    for word in line.split(" "):
-        vowels = 'aeiouy'
-#        word = word.lower().strip("!@#$%^&*()_+-={}[];:,.<>/?")
-        word = word.lower().strip(".:;?!")
-        if word[0] in vowels:
-            count +=1
-        for index in range(1,len(word)):
-            if word[index] in vowels and word[index-1] not in vowels:
-                count +=1
-        if word.endswith('e'):
-            count -= 1
-        if word.endswith('le'):
-            count+=1
-        if count == 0:
-            count +=1
-    return count / maxsyllables
-
+from utils import count_syllables
 # scoring equality of syllalbe numbers between two lines
+
 def syllable_match(line1, line2):
-    if syllables(line1) == syllables(line2):
+    if count_syllables(line1) == count_syllables(line2):
         return 1
     else:
         return 0
