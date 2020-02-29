@@ -15,16 +15,16 @@ class LyricsGenerator:
         self.training_file = f"data/{identifier}.txt"
         self.lyrics_model = LyricsNN(nn_depth, identifier)
         self.markov_model = create_markov_model(self.training_file)
+        self.original_bars = split_file(self.training_file)
 
     def training_phase(self):
-        original_bars = split_file(self.training_file)
-        rhyme_list = self.rhymeindex(original_bars)
-        x_data, y_data = self.build_dataset(original_bars, rhyme_list)
+        rhyme_list = self.rhymeindex(self.original_bars)
+        x_data, y_data = self.build_dataset(self.original_bars, rhyme_list)
         self.lyrics_model.train(x_data, y_data)
 
     def generating_phase(self):
         markov_bars = self.generate_lyrics()
-        if self.rhyme_filename in os.listdir("."):
+        if os.path.exists(self.rhyme_filename):
             rhyme_list = split_file(self.rhyme_filename)
         else:
             rhyme_list = self.rhymeindex(markov_bars)
@@ -35,84 +35,63 @@ class LyricsGenerator:
             f.write(bar)
             f.write("\n")
 
-    def generate_lyrics(self):
-        bars = []
-        last_words = []
-        lyriclength = len(split_file(self.training_file))
-        count = 0
-
-        while len(bars) < lyriclength / 9 and count < lyriclength * 2:
-            bar = self.markov_model.make_sentence(max_overlap_ratio=0.49, tries=100)
-            if bar and self.syllables(bar) < 1:
-                def get_last_word(bar):
-                    last_word = bar.split(" ")[-1]
-                    if last_word[-1] in "!.?,":
-                        last_word = last_word[:-1]
-                    return last_word
-
-                last_word = get_last_word(bar)
-                if bar not in bars and last_words.count(last_word) < 3:
-                    bars.append(bar)
-                    last_words.append(last_word)
-                    count += 1
-        return bars
-
     def build_dataset(self, lines, rhyme_list):
         dataset = []
-        line_list = []
         for line in lines:
-            line_list = [line, self.syllables(line), self.rhyme(line, rhyme_list)]
+            line_list = [self.syllables(line), self.rhyme(line, rhyme_list)]
             dataset.append(line_list)
         x_data = []
         y_data = []
         for i in range(len(dataset) - 3):
-            line1 = dataset[i][1:]
-            line2 = dataset[i + 1][1:]
-            line3 = dataset[i + 2][1:]
-            line4 = dataset[i + 3][1:]
-            x = [line1[0], line1[1], line2[0], line2[1]]
-            x = np.array(x)
-            x = x.reshape(2, 2)
+            line1 = dataset[i]
+            line2 = dataset[i + 1]
+            line3 = dataset[i + 2]
+            line4 = dataset[i + 3]
+            x = np.array([line1[0], line1[1], line2[0], line2[1]]).reshape(2, 2)
             x_data.append(x)
-            y = [line3[0], line3[1], line4[0], line4[1]]
-            y = np.array(y)
-            y = y.reshape(2, 2)
+            y = np.array([line3[0], line3[1], line4[0], line4[1]]).reshape(2, 2)
             y_data.append(y)
         x_data = np.array(x_data)
         y_data = np.array(y_data)
         return x_data, y_data
 
+    def generate_lyrics(self):
+        bars = []
+        last_words = []
+        # count = 0
+
+        while len(bars) < len(self.original_bars) / 4:
+            bar = self.markov_model.make_sentence(max_overlap_ratio=0.49, tries=50)
+            if bar and self.syllables(bar) < 1:
+                last_word = bar.split(" ")[-1]
+                if bar not in bars and last_words.count(last_word) < 3:
+                    bars.append(bar)
+                    last_words.append(last_word)
+        return bars
+
     def create_vectors(self, rhyme_list):
         lyrics_vectors = []
-        human_lyrics = split_file(self.training_file)
-        initial_index = random.choice(range(len(human_lyrics) - 1))
-        initial_lines = human_lyrics[initial_index:initial_index + 2]
+        initial_index = random.choice(range(len(self.original_bars) - 1))
+        initial_lines = self.original_bars[initial_index:initial_index + 2]
         starting_input = []
         for line in initial_lines:
             starting_input.append([self.syllables(line), self.rhyme(line, rhyme_list)])
-        starting_vectors = self.lyrics_model.model.predict(np.array([starting_input]).flatten().reshape(1, 2, 2))
+        starting_vectors = self.lyrics_model.predict(np.array([starting_input]).flatten().reshape(1, 2, 2))
         lyrics_vectors.append(starting_vectors)
-        for i in range(100):
-            lyrics_vectors.append(self.lyrics_model.model.predict(np.array([lyrics_vectors[-1]]).flatten().reshape(1, 2, 2)))
+        for i in range(20):  # number of 2-lines to be generated
+            lyrics_vectors.append(self.lyrics_model.predict(np.array([lyrics_vectors[-1]]).flatten().reshape(1, 2, 2)))
         return lyrics_vectors
 
     def vectors_into_lyrics(self, vectors, markov_bars, rhyme_list):
-        print("\n\n")
-        print("Writing verse:")
-        print("\n\n")
+        print("Writing verse:\n")
 
         def last_word_compare(lyrics, line2):
             penalty = 0
             for line1 in lyrics:
                 word1 = line1.split(" ")[-1]
                 word2 = line2.split(" ")[-1]
-                if len(word1) > 1 and len(word2) > 1:
-                    while word1[-1] in "?!,. ":
-                        word1 = word1[:-1]
-                    while word2[-1] in "?!,. ":
-                        word2 = word2[:-1]
-                    if word1 == word2:
-                        penalty += 0.2
+                if len(word1) > 1 and len(word2) > 1 and word1 == word2:
+                    penalty += 0.2
             return penalty
 
         def calculate_score(vector_half, syllables, rhyme, penalty):
@@ -125,6 +104,7 @@ class LyricsGenerator:
             return score
 
         dataset = []
+        print(len(markov_bars))
         for line in markov_bars:
             line_list = [line, self.syllables(line), self.rhyme(line, rhyme_list)]
             dataset.append(line_list)
@@ -163,7 +143,6 @@ class LyricsGenerator:
         count = 0
         for word in line.split(" "):
             vowels = 'aeiouy'
-            # 		word = word.lower().strip("!@#$%^&*()_+-={}[];:,.<>/?")
             word = word.lower().strip(".:;?!")
             if word:
                 if word[0] in vowels:
@@ -220,5 +199,5 @@ class LyricsGenerator:
             float_rhyme = float_rhyme / float(len(rhyme_list))
             return float_rhyme
         except Exception:
-            float_rhyme = None
+            float_rhyme = 0
             return float_rhyme

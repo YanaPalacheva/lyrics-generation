@@ -14,7 +14,7 @@ class LyricsNN:
         for i in range(depth):
             self.model.add(LSTM(8, return_sequences=True))
         self.model.add(LSTM(2, return_sequences=True))
-        self.model.summary()
+        # self.model.summary()
         self.model.compile(optimizer='rmsprop',
                            loss='mse')
 
@@ -28,3 +28,6 @@ class LyricsNN:
                        epochs=3,
                        verbose=1)
         self.model.save_weights(self.model_filename)
+
+    def predict(self, input):
+        return self.model.predict(input)
