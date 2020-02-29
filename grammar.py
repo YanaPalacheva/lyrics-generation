@@ -37,7 +37,7 @@ lyrics = f.readlines()
 def grammar_check_file(filename, tool = 'language_check'):
     f = open(filename, "r")
     lyrics = f.readlines() 
-    score = mean_grammatical_error(lyrics)
+    score = mean_grammatical_error(lyrics, tool)
     print(filename, "has mean grammatical error ", score)
     
 grammar_check_file("freddie-mercury_generated.txt")
