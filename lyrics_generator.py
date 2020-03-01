@@ -33,12 +33,16 @@ class LyricsGenerator:
             rhyme_list = split_file(self.rhymer.rhyme_filename)
         else:
             print("Rhyme list was not created, please train the model first.")
+            return
         vectors = self.create_vectors(rhyme_list)
         lyrics = self.vectors_into_lyrics(vectors, markov_bars, rhyme_list)
         f = open(f"generated_lyrics/{self.identifier}{self.path_modifier}_generated.txt", "w", encoding='utf-8')
+        lyrics_str = ''
         for bar in lyrics:
             f.write(bar)
             f.write("\n")
+            lyrics_str += bar + '\n'
+        return lyrics_str
 
     def build_dataset(self, lines, rhyme_list):
         dataset = []
@@ -64,7 +68,7 @@ class LyricsGenerator:
         bars = []
         last_words = []
         overlap = self.params['max_overlap']
-        while len(bars) < self.params['gen_lyrics_len']:
+        while len(bars) < self.params['num_lines']:
             bar = self.markov_model.make_sentence(max_overlap_ratio=overlap, tries=50)
             if bar and self.syllables(bar) < 1:
                 last_word = get_last_word(bar)
@@ -82,7 +86,7 @@ class LyricsGenerator:
             starting_input.append([self.syllables(line), self.rhymer.rhyme(i, line, rhyme_list)])
         starting_vectors = self.lyrics_model.predict(np.array([starting_input]).flatten().reshape(1, 2, 2))
         lyrics_vectors.append(starting_vectors)
-        for i in range(self.params['gen_lyrics_len']):  # number of 2-lines to be generated
+        for i in range(self.params['num_lines']):  # number of 2-lines to be generated
             lyrics_vectors.append(self.lyrics_model.predict(np.array([lyrics_vectors[-1]]).flatten().reshape(1, 2, 2)))
         return lyrics_vectors
 

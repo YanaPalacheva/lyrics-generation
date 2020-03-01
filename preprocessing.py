@@ -93,5 +93,9 @@ create_rhymescheme('freddie-mercury', syllable_rhyme=False, generated=False)
 # # syls = mean_syllables(genres.keys())
 # print(syls)
 
+# from evaluation.grammar import lang_errors
+# lang_errors('We are make soup')
+# original_bars = split_file('data/freddie-mercury.txt')
+# print(mean_grammatical_error(original_bars[:50]))
 
 
