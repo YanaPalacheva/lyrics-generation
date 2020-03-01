@@ -5,18 +5,32 @@ from ui import open_gui
 
 
 def generate(ident, prms):
-    lyrics_gen = LyricsGenerator(ident, prms, old=True)
-    # lyrics_gen.training_phase()
+    lyrics_gen = LyricsGenerator(ident, prms, syllable_rhyme=False)
+    lyrics_gen.training_phase()
     lyrics = lyrics_gen.generating_phase()
     return lyrics
 
 
+def user_generation(idents, prms):
+    with open('data/user-lyrics.txt', 'w') as outfile:
+        for ident in idents:
+            with open(f'data/{ident}.txt') as infile:
+                for line in infile:
+                    outfile.write(line)
+    return generate('user-lyrics', prms)
+
+
 # evaluation
-def evaluate(ident, old=False):
-    if old:
-        endings = split_file(f'schemes/{ident}.rhymes')
+def evaluate(ident, syllable_rhyme=True, generated=False):
+    if generated:
+        gen = '_generated'
     else:
-        endings = split_file(f'schemes/{ident}.schemes')
+        gen = ''
+    if syllable_rhyme:
+        syl = '.syl'
+    else:
+        syl = ''
+    endings = split_file(f'schemes/{ident}{gen}{syl}.schemes')
     return rhyme_score(endings)
 
 
@@ -27,12 +41,7 @@ params = {'depth': 4, 'max_syllables': 10,
 
 # generate(identifier, params)
 
-open_gui(generate)
+open_gui(user_generation)
 
 # iden = 'depeche-mode'
 # print(evaluate(iden))
-
-
-
-
-
