@@ -38,3 +38,7 @@ where *rhyme_count* is the number of existing rhymes within 4-line chunks, *(2\*
 
 Rhyming lines score is a number of lines that rhymed with another line within the 4-line chunk divided by total number of lines:
 > *rhymed_line_num / line_num*
+
+## Additional features
+
+**Grammaticality evaluation**: to be added. 
