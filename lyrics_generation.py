@@ -1,5 +1,6 @@
 from lyrics_generator import LyricsGenerator
 from utils import split_file
+from preprocessing import create_rhymescheme
 from evaluation.rhyme import rhyme_score
 from ui import open_gui
 
@@ -20,6 +21,11 @@ def user_generation(idents, prms):
     return generate('user-lyrics', prms)
 
 
+def user_evaluation():
+    create_rhymescheme('user-lyrics', syllable_rhyme=False, generated=True)
+    return evaluate('user-lyrics', syllable_rhyme=False, generated=True)
+
+
 # evaluation
 def evaluate(ident, syllable_rhyme=True, generated=False):
     if generated:
@@ -34,14 +40,11 @@ def evaluate(ident, syllable_rhyme=True, generated=False):
     return rhyme_score(endings)
 
 
-identifier = 'enya'
-# params
-params = {'depth': 4, 'max_syllables': 10,
-          'max_overlap': 0.5, 'num_lines': 40}
-
+# identifier = 'enya'
+# # params
+# params = {'depth': 4, 'max_syllables': 10,
+#           'max_overlap': 0.5, 'num_lines': 40}
 # generate(identifier, params)
 
-open_gui(user_generation)
+open_gui(user_generation, user_evaluation)
 
-# iden = 'depeche-mode'
-# print(evaluate(iden))

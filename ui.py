@@ -7,10 +7,11 @@ from utils import default_params
 
 
 class LyricsGUI(tk.Frame):
-    def __init__(self, master, generation):
+    def __init__(self, master, generation, evaluation):
         tk.Frame.__init__(self, master)
         self.master = master
         self.generation = generation
+        self.evaluation = evaluation
         self.master.title("Lyrics Generation")
         self.create_settings_frame()
         self.create_lyrics_textarea()
@@ -107,7 +108,7 @@ class LyricsGUI(tk.Frame):
     def create_eval_frame(self, parent):
         eval_frame = tk.Frame(parent)
         self.eval_result = tk.Entry(eval_frame)
-        eval_button = tk.Button(eval_frame, text='Evaluate')
+        eval_button = tk.Button(eval_frame, text='Evaluate rhyme')
         eval_button.bind("<Button-1>", self.on_click_evaluate)
         eval_button.pack(padx=10, pady=5, fill='both', expand='no', side=tk.LEFT)
         self.eval_result.pack(padx=10, pady=5, fill='both', expand='no', side=tk.LEFT)
@@ -148,8 +149,8 @@ class LyricsGUI(tk.Frame):
 
     def on_click_evaluate(self, event):
         self.eval_result.delete(0, tk.END)
-        # res = get_eval_res()
-        res = 'hmm %'
+        res1, res2 = self.evaluation()
+        res = f'{res1}; {res2}'
         self.eval_result.insert(0, res)
 
     def get_current_identifier(self):
@@ -194,8 +195,8 @@ class LyricsGUI(tk.Frame):
         self.max_syllables.delete(0, tk.END)
 
 
-def open_gui(generation_method):
+def open_gui(generation_method, evaluation_method):
     root = tk.Tk()
     root.geometry("800x600")
-    app = LyricsGUI(root, generation_method)
+    app = LyricsGUI(root, generation_method, evaluation_method)
     root.mainloop()
