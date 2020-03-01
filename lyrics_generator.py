@@ -3,7 +3,7 @@ import random
 import os
 import pronouncing
 from nn_model import LyricsNN
-from utils import create_markov_model, split_file, count_syllables
+from utils import create_markov_model, split_file, count_syllables, get_last_word
 from rhymer import Rhymer
 from rhymer_old import RhymerOld
 
@@ -66,7 +66,7 @@ class LyricsGenerator:
         while len(bars) < self.params['gen_lyrics_len']:
             bar = self.markov_model.make_sentence(max_overlap_ratio=overlap, tries=50)
             if bar and self.syllables(bar) < 1:
-                last_word = bar.split(" ")[-1]
+                last_word = get_last_word(bar)
                 if bar not in bars and last_words.count(last_word) < 3:
                     bars.append(bar)
                     last_words.append(last_word)
@@ -91,8 +91,8 @@ class LyricsGenerator:
         def last_word_compare(lyrics, line2):
             penalty = 0
             for line1 in lyrics:
-                word1 = line1.split(" ")[-1]
-                word2 = line2.split(" ")[-1]
+                word1 = get_last_word(line1)
+                word2 = get_last_word(line2)
                 if len(word1) > 1 and len(word2) > 1 and word1 == word2:
                     penalty += 0.2
             return penalty

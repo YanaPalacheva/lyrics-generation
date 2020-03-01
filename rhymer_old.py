@@ -1,10 +1,11 @@
 import re
 import pronouncing
 import nltk
+from utils import get_last_word
 
 
 def create_rhymescheme(line):
-    word = re.sub(r"\W+", '', line.split(" ")[-1]).lower()
+    word = re.sub(r"\W+", '', get_last_word(line)).lower()
     rhymeslist = pronouncing.rhymes(word)
     rhymeslistends = []
     for i in rhymeslist:

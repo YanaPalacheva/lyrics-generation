@@ -1,12 +1,17 @@
 from utils import count_syllables
-# scoring equality of syllalbe numbers between two lines
+from .grammar import *
+from .rhyme import *
 
+
+# scoring equality of syllalbe numbers between two lines
 def syllable_match(line1, line2):
     if count_syllables(line1) == count_syllables(line2):
         return 1
     else:
         return 0
 
+
+# todo rewrite with respect to grammar and rhyme
 # evaluating the lyrics based on aspect which can be rhyme_score or syllable_match
 def eval(lyrics, aspect, beta = 0.9, a = 0.2, b = 0.1):
     score = 0

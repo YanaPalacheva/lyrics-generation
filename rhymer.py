@@ -4,7 +4,7 @@ import nltk
 import operator
 import os
 from multi_key_dict import multi_key_dict
-from utils import split_file
+from utils import split_file, get_last_word
 
 
 def init_sound_dict():
@@ -38,7 +38,7 @@ def init_sound_dict():
 
 class Rhymer:
     def __init__(self, identifier):
-        self.rhyme_filename = f"rhymes/{identifier}.rhymes"
+        self.rhyme_filename = f"rhymes/{identifier}.syl.rhymes"
         self.scheme_filename = f"schemes/{identifier}.schemes"
         self.lyrics_filename = f"data/{identifier}.txt"
         self.entries = nltk.corpus.cmudict.entries()
@@ -48,7 +48,7 @@ class Rhymer:
                 self.rhymeschemes = f.read().splitlines()
 
     def line_rhymescheme(self, line):
-        end_word = re.sub(r"\W+", '', line.split(" ")[-1]).lower()
+        end_word = re.sub(r"\W+", '', get_last_word(line)).lower()
         pronunciation_list = pronouncing.phones_for_word(end_word)
         if pronunciation_list:
             potential_rhymes = {}

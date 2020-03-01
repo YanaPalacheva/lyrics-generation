@@ -1,5 +1,6 @@
 from lyrics_generator import LyricsGenerator
-from utils import create_markov_model
+from utils import split_file
+from evaluation.rhyme import rhyme_score
 
 # score (>3-syllable lines considered)
 mean_syls = {'50-cent': 11, 'elvis-presley': 9, 'freddie-mercury': 9, 'evanescence': 8,
@@ -11,9 +12,23 @@ identifier = 'enya'
 params = {'depth': 4, 'max_syllables': 10,
           'max_overlap': 0.5, 'gen_lyrics_len': 40}
 
-lyrics_gen = LyricsGenerator(identifier, params, old=True)
+# lyrics_gen = LyricsGenerator(identifier, params, old=True)
 # lyrics_gen.training_phase()
-lyrics_gen.generating_phase()
+# lyrics_gen.generating_phase()
+
+
+# evaluation
+def evaluate(ident, old=False):
+    if old:
+        endings = split_file(f'schemes/{ident}.rhymes')
+    else:
+        endings = split_file(f'schemes/{ident}.schemes')
+    return rhyme_score(endings)
+
+
+iden = 'depeche-mode'
+print(evaluate(iden))
+
 
 
 

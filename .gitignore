@@ -4,3 +4,4 @@ lyrics.csv
 .models/**
 .generated_lyrics/**
 .rhymes/**
+.schemes/**

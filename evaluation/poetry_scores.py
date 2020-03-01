@@ -1,4 +1,6 @@
 import pronouncing
+import re
+
 
 def last_syllable(word):
     vowels = 'aeiouy'
@@ -18,13 +20,13 @@ def last_syllable(word):
             if rev[i] in vowels:
                 idx = i
                 break
-                
+
     if idx < 0:
         idx = len(rev)
-        
     return rev[idx::-1]
 
-def rhyme_score(line1, line2, alpha = 0.4):
+
+def rhyme_score(line1, line2, alpha=0.4):
     word1 = re.sub(r"\W+", '', line1.split(" ")[-1]).lower().strip(".:;?!")
     word2 = re.sub(r"\W+", '', line2.split(" ")[-1]).lower().strip(".:;?!")
     if word2 in pronouncing.rhymes(word1) or word1 in pronouncing.rhymes(word2):

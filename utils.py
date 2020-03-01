@@ -44,3 +44,7 @@ def count_syllables(line):
         else:
             count += unknown_word_syllables(word)
     return count
+
+
+def get_last_word(line):
+    return line.split(" ")[-1]
