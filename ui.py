@@ -1,4 +1,5 @@
 import tkinter as tk
+import math
 from tkinter import ttk
 from tkinter import scrolledtext as sctxt
 from preprocessing import artists, genres
@@ -46,6 +47,18 @@ class LyricsGUI(tk.Frame):
         self.artists_cb.current(0)
         self.genres_cb.current(0)
 
+        shuffle_frame = tk.Frame(artists_tab)
+        shuffle_label = tk.Label(shuffle_frame, text='Shuffle with')
+        self.shuffle_value = tk.BooleanVar()
+        self.shuffle_value.set(False)
+        shuffle_check = tk.Checkbutton(shuffle_frame, var=self.shuffle_value)
+        self.add_artists_cb = ttk.Combobox(shuffle_frame, values=artists, state='readonly')
+        self.add_artists_cb.bind('<<ComboboxSelected>>', self.clear_params)
+        shuffle_check.pack(padx=10, pady=10, fill='both', expand='no', side=tk.LEFT)
+        shuffle_label.pack(padx=0, pady=10, fill='both', expand='no', side=tk.LEFT)
+        self.add_artists_cb.pack(padx=10, pady=10, fill='both', expand='no', side=tk.LEFT)
+        shuffle_frame.pack(padx=10, pady=10, fill='both', expand='no')
+
     def create_parameters_frame(self, parent):
         params_frame = tk.Frame(parent)
         lines_frame = tk.Frame(params_frame)
@@ -76,7 +89,7 @@ class LyricsGUI(tk.Frame):
         default_check = tk.Checkbutton(default_frame, var=self.def_value, command=self.on_check_default)
         default_check.bind()
         default_check.pack(padx=10, pady=10, fill='both', expand='no', side=tk.LEFT)
-        default_label.pack(padx=10, pady=10, fill='both', expand='no', side=tk.LEFT)
+        default_label.pack(padx=0, pady=10, fill='both', expand='no', side=tk.LEFT)
         default_frame.pack(padx=10, pady=10, fill='both', expand='no')
 
         for f in [lines_frame, nn_frame, overlap_frame, syl_frame]:
@@ -98,10 +111,20 @@ class LyricsGUI(tk.Frame):
     def on_click_generate(self, event):
         self.gen_lyrics_textarea.delete(1.0, tk.END)
         ident = self.get_current_identifier()
+        print(ident)
+        params = self.check_params()
+        if params:
+            lyrics = self.generation(ident, params)
+            if lyrics:
+                self.gen_lyrics_textarea.insert(1.0, lyrics)
+            else:
+                self.gen_lyrics_textarea.insert(1.0, 'Generation failed :(')
+
+    def check_params(self):
         if not self.num_lines.get() or not self.nn_depth.get() or\
            not self.max_syllables.get() or not self.max_overlap.get():
             print('please fill all parameters')  # todo replace with an alert
-            return
+            return None
         try:
             params = {'depth': int(self.nn_depth.get()),
                       'num_lines': int(self.num_lines.get()),
@@ -109,12 +132,8 @@ class LyricsGUI(tk.Frame):
                       'max_overlap': float(self.max_overlap.get())}
         except ValueError:
             print('please check format (int or float only)')  # todo replace with an alert
-            return
-        lyrics = self.generation(ident, params)
-        if lyrics:
-            self.gen_lyrics_textarea.insert(1.0, lyrics)
-        else:
-            self.gen_lyrics_textarea.insert(1.0, 'Generation failed :(')
+            return None
+        return params
 
     def on_check_default(self):
         if self.def_value.get():
@@ -125,16 +144,29 @@ class LyricsGUI(tk.Frame):
     def get_current_identifier(self):
         tab = self.nb.tab(self.nb.select(), "text")
         if tab == 'Artists':
-            return self.artists_cb.get()
+            primary_artist = self.artists_cb.get()
+            if self.shuffle_value.get():
+                additional_artist = self.add_artists_cb.get()
+                return [primary_artist, additional_artist]
+            else:
+                return [primary_artist]
         else:
-            return self.genres_cb.get()
+            return [self.genres_cb.get()]
 
     def set_default_params(self):
         ident = self.get_current_identifier()
+        if len(ident) > 1:
+            max_syllables = math.ceil((default_params['syl_overlap'][ident[0]][0] +
+                                       default_params['syl_overlap'][ident[1]][0]) / 2)
+            max_overlap = math.ceil((default_params['syl_overlap'][ident[0]][1] +
+                                     default_params['syl_overlap'][ident[1]][1]) / 2 * 10) / 10
+        else:
+            max_syllables = default_params['syl_overlap'][ident[0]][0]
+            max_overlap = default_params['syl_overlap'][ident[0]][1]
         self.num_lines.insert(0, default_params['num_lines'])
         self.nn_depth.insert(0, default_params['depth'])
-        self.max_overlap.insert(0, default_params['syl_overlap'][ident][1])
-        self.max_syllables.insert(0, default_params['syl_overlap'][ident][0])
+        self.max_overlap.insert(0, max_overlap)
+        self.max_syllables.insert(0, max_syllables)
 
     def clear_params(self, event=None):
         if self.def_value.get():
