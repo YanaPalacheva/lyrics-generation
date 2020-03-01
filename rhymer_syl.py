@@ -9,38 +9,52 @@ from utils import split_file, get_last_word
 
 def init_sound_dict():
     sound_dict = multi_key_dict()
-    sound_dict['IH0', 'IY2', 'IY1', 'IY0', 'IH1', 'IH2', 'UH2', 'Y', 'i'] = ['IH0', 'IY2', 'IY1', 'IY0', 'IH1', 'IH2',
-                                                                             'UH2', 'Y']
-    sound_dict['UW0', 'UW1', 'UW2', 'UH0', 'UH1', 'u'] = ['UW0', 'UW1', 'UW2', 'UH0', 'UH1']
-    sound_dict['AA1', 'AA0', 'AA2', 'AH0', 'AH1', 'AH2', 'a'] = ['AA1', 'AA0', 'AA2', 'AH0', 'AH1', 'AH2']
-    sound_dict['AY1', 'AY2', 'AY0', 'ay'] = ['AY1', 'AY2', 'AY0']
-    sound_dict['AW0', 'AW1', 'AW2', 'aw'] = ['AW0', 'AW1', 'AW2']
-    sound_dict['AO1', 'AO1', 'AO2', 'o'] = ['AO1', 'AO1', 'AO2']
-    sound_dict['OY0', 'OY1', 'OY2', 'oy'] = ['OY0', 'OY1', 'OY2']
-    sound_dict['OW0', 'OW1', 'OW2', 'ow'] = ['OW0', 'OW1', 'OW2']
-    sound_dict['EY0', 'EY1', 'EY2', 'ey'] = ['EY0', 'EY1', 'EY2']
-    sound_dict['EH0', 'EH1', 'EH2', 'AE1', 'AE0', 'AE2', 'e'] = ['EH0', 'EH1', 'EH2', 'AE1', 'AE0', 'AE2']
-    sound_dict['ER1', 'ER0', 'ER2', 'er'] = ['ER1', 'ER0', 'ER2']
-    sound_dict['S', 'Z', 'DH', 'TH', 's', 'z', 'th'] = ['S', 'Z', 'DH', 'TH']
-    sound_dict['P', 'B', 'p', 'b'] = ['P', 'B']
-    sound_dict['M', 'N', 'NG', 'm', 'n', 'ng'] = ['M', 'N', 'NG']
-    sound_dict['F', 'V', 'f', 'v'] = ['F', 'V']
-    sound_dict['G', 'K', 'g', 'k'] = ['G', 'K']
-    sound_dict['T', 'D', 't', 'd'] = ['T', 'D']
-    sound_dict['JH', 'CH', 'ge', 'ch'] = ['JH', 'CH']
-    sound_dict['SH', 'ZH', 'sh', 'zh'] = ['SH', 'ZH']
-    sound_dict['L', 'l'] = ['L']
-    sound_dict['R', 'r'] = ['R']
+    sound_dict['IY2', 'IY1', 'IH1', 'IH2', 'UH2', 'Y'] = ['IY2', 'IY1', 'IH1', 'IH2', 'UH2', 'Y']
+    sound_dict['IH0', 'IY0'] = ['IH0', 'IY0']
+    sound_dict['UW0', 'UH0'] = ['UW0', 'UH0']
+    sound_dict['UW1', 'UW2', 'UH1'] = ['UW1', 'UW2', 'UH1']
+    sound_dict['AA0', 'AH0'] = ['AA0', 'AH0']
+    sound_dict['AA1', 'AA2', 'AH1', 'AH2'] = ['AA1', 'AA2', 'AH1', 'AH2']
+    sound_dict['AY0'] = ['AY0']
+    sound_dict['AY1', 'AY2'] = ['AY1', 'AY2']
+    sound_dict['AW0'] = ['AW0']
+    sound_dict['AW1', 'AW2'] = ['AW1', 'AW2']
+    sound_dict['AO0'] = ['AO0']
+    sound_dict['AO1', 'AO1', 'AO2'] = ['AO1', 'AO1', 'AO2']
+    sound_dict['OY0'] = ['OY0']
+    sound_dict['OY1', 'OY2'] = ['OY1', 'OY2']
+    sound_dict['OW0'] = ['OW0']
+    sound_dict['OW1', 'OW2'] = ['OW1', 'OW2']
+    sound_dict['EY0'] = ['EY0']
+    sound_dict['EY1', 'EY2'] = ['EY1', 'EY2']
+    sound_dict['EH0', 'AE0'] = ['EH0', 'AE0']
+    sound_dict['EH1', 'EH2', 'AE1', 'AE2'] = ['EH1', 'EH2', 'AE1', 'AE2']
+    sound_dict['ER0'] = ['ER0']
+    sound_dict['ER1', 'ER2'] = ['ER1', 'ER2']
+    sound_dict['S', 'Z', 'DH', 'TH'] = ['S', 'Z', 'DH', 'TH']
+    sound_dict['P', 'B'] = ['P', 'B']
+    sound_dict['M', 'N', 'NG'] = ['M', 'N', 'NG']
+    sound_dict['F', 'V'] = ['F', 'V']
+    sound_dict['G', 'K'] = ['G', 'K']
+    sound_dict['T', 'D'] = ['T', 'D']
+    sound_dict['JH', 'CH'] = ['JH', 'CH']
+    sound_dict['SH', 'ZH'] = ['SH', 'ZH']
+    sound_dict['L'] = ['L']
+    sound_dict['R'] = ['R']
     sound_dict['HH'] = ['HH']
     sound_dict['W'] = ['W']
     return sound_dict
 
 
-class Rhymer:
-    def __init__(self, identifier):
+class RhymerSyl:
+    def __init__(self, identifier, generated=False):
         self.rhyme_filename = f"rhymes/{identifier}.syl.rhymes"
-        self.scheme_filename = f"schemes/{identifier}.schemes"
-        self.lyrics_filename = f"data/{identifier}.txt"
+        if generated:
+            self.scheme_filename = f"schemes/{identifier}_generated.syl.schemes"
+            self.lyrics_filename = f"generated_lyrics/{identifier}_syl_generated.txt"
+        else:
+            self.scheme_filename = f"schemes/{identifier}.syl.schemes"
+            self.lyrics_filename = f"data/{identifier}.txt"
         self.entries = nltk.corpus.cmudict.entries()
         self.sound_dict = init_sound_dict()
         if os.path.exists(self.scheme_filename):

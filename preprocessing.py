@@ -2,7 +2,8 @@ import pandas as pd
 import re
 import num2words
 import os
-from rhymer import Rhymer
+from rhymer_syl import RhymerSyl
+from rhymer_end import RhymerEnd
 from utils import split_file, count_syllables
 
 artists = ['50-cent', 'elvis-presley', 'freddie-mercury', 'evanescence', 'enya',
@@ -13,6 +14,7 @@ genres = {'hip-hop': ['50-cent', 'drake', '2pac'],
           'rock': ['evanescence', 'the-animals', 'the-doors', 'elvis-presley', 'freddie-mercury', 'david-bowie'],
           'electronic': ['depeche-mode', 'daft-punk', 'caravan-palace'],
           'pop': ['ed-sheeran', 'ariana-grande', 'adele', 'bee-gees']}
+
 
 def clean_input(songs):
     for i, song in enumerate(songs):
@@ -47,8 +49,11 @@ def create_artist_file(file, artist):
             f.write(song)
 
 
-def create_rhymescheme(artist):
-    rhymer = Rhymer(artist)
+def create_rhymescheme(identifier, syllable_rhyme, generated=False):
+    if syllable_rhyme:
+        rhymer = RhymerSyl(identifier, generated)
+    else:
+        rhymer = RhymerEnd(identifier, generated)
     rhymer.create_rhymescheme()
 
 
@@ -60,7 +65,7 @@ def mean_syllables(target_list):
         excluded = 0
         for line in original_bars:
             syls = count_syllables(line)
-            if syls > 4:
+            if syls > 3:
                 count += syls
             else:
                 excluded += 1
@@ -82,7 +87,7 @@ for mydir in dirs:
     if not os.path.exists(mydir):
         os.mkdir(mydir)
 # create_files()
-# create_rhymescheme('depeche-mode')
+create_rhymescheme('freddie-mercury', syllable_rhyme=False, generated=False)
 
 # syls = mean_syllables(artists)
 # # syls = mean_syllables(genres.keys())

@@ -1,21 +1,22 @@
 import numpy as np
 import random
 import os
-import pronouncing
 from nn_model import LyricsNN
 from utils import create_markov_model, split_file, count_syllables, get_last_word
-from rhymer import Rhymer
-from rhymer_old import RhymerOld
+from rhymer_end import RhymerEnd
+from rhymer_syl import RhymerSyl
 
 
 class LyricsGenerator:
-    def __init__(self, identifier, params, old=False):
+    def __init__(self, identifier, params, syllable_rhyme=False):
         self.params = params
         self.identifier = identifier
-        if old:
-            self.rhymer = RhymerOld(identifier)
+        if syllable_rhyme:
+            self.rhymer = RhymerSyl(identifier)
+            self.path_modifier = '_syl'
         else:
-            self.rhymer = Rhymer(identifier)
+            self.rhymer = RhymerEnd(identifier)
+            self.path_modifier = ''
         self.training_file = f"data/{identifier}.txt"
         self.lyrics_model = LyricsNN(self.params['depth'], identifier)
         self.markov_model = create_markov_model(self.training_file)
@@ -34,7 +35,7 @@ class LyricsGenerator:
             print("Rhyme list was not created, please train the model first.")
         vectors = self.create_vectors(rhyme_list)
         lyrics = self.vectors_into_lyrics(vectors, markov_bars, rhyme_list)
-        f = open(f"generated_lyrics/{self.identifier}_generated.txt", "w", encoding='utf-8')
+        f = open(f"generated_lyrics/{self.identifier}{self.path_modifier}_generated.txt", "w", encoding='utf-8')
         for bar in lyrics:
             f.write(bar)
             f.write("\n")
