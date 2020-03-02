@@ -1,4 +1,6 @@
 lyrics.csv
 .idea/**
 .rhymes/**
+.schemes/**
+.generated_lyrics/**
 .models/**
