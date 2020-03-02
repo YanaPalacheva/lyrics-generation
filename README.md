@@ -3,7 +3,7 @@
 Based on [RNN Markov Poetry Generator](https://www.kaggle.com/paultimothymooney/poetry-generator-rnn-markov)
 
 ## Implemented features:
-- Extended rhyming: based on 2-morpheme endings instead of 2-letter endings. Morphemes are grouped by phonetic properties: similar sounds, stress, paired consonants.
+- Extended rhyming: based on 2-morpheme endings instead of 2-letter endings (based on [Ghostwriter](https://github.com/dns-mcdaid/Ghostwriter) Rhyming Algorithm). Rhyming morphemes are grouped by phonetic properties: similar sounds, stress, paired consonants.
 - Works for different artists and genres (samples from the MetroLyrics dataset are in *data* folder).
 - Evaluation functions for rhyme and grammar that allow to evaluate generated lyrics.
 - User interface. It allows to mix two artists together or simply generate lyrics based on a single artist or genre. It also allows to change generation parameters: depth of the RNN, max number of syllables per lyne, max overlap ratio for Markov sequences, desired number of generated lines.
