@@ -13,6 +13,9 @@ The repository contains a set of preprocessed initial dataset files and generate
 
 - Download the MetroLyrics dataset from [Kaggle](https://www.kaggle.com/gyani95/380000-lyrics-from-metrolyrics), extract it and put *lyrics.csv* in the working (project) folder. Then use *preprocessing.py* to add genres and artists, to preprocess the data, to calculate average syllables and/or to create rhyming schemes for evaluation. After this run *lyrics_generation.py* to launch the GUI and enjoy the results.
 
+### Dependencies
+To install all required packages, simply run *pip install -r path-to-project-root\requirements.txt*.
+
 ## GUI guide
 First of all, choose the base data for lyrics generation: **artists** or **genres**.
 
