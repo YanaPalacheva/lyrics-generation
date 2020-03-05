@@ -9,7 +9,7 @@ Based on [RNN Markov Poetry Generator](https://www.kaggle.com/paultimothymooney/
 - User interface. It allows to mix two artists together or simply generate lyrics based on a single artist or genre. It also allows to change generation parameters: depth of the RNN, max number of syllables per lyne, max overlap ratio for Markov sequences, desired number of generated lines.
 
 ## Working with dataset
-The repository contains a set of preprocessed initial dataset files and generated lyrics for your convinience. But you are welcome to try new artists and genres. For that, you would have to do the following: 
+The repository contains a set of preprocessed initial dataset files and generated lyrics for your convenience. But you are welcome to try new artists and genres. For that, you would have to do the following: 
 
 - Download the MetroLyrics dataset from [Kaggle](https://www.kaggle.com/gyani95/380000-lyrics-from-metrolyrics), extract it and put *lyrics.csv* in the working (project) folder. Then use *preprocessing.py* to add genres and artists, to preprocess the data, to calculate average syllables and/or to create rhyming schemes for evaluation. After this run *lyrics_generation.py* to launch the GUI and enjoy the results.
 
