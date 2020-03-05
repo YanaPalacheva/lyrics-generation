@@ -41,7 +41,7 @@ ginger_parser = GingerIt()
 
 evaluate_grammar('data/', 'grammar scores of originals/', allow_typos=False, parser=ginger_parser, combined=True)
 
-evaluate_grammar('generated_lyrics/', 'grammar scores of generated lyrics/', allow_typos=False, parser=ginger_parser, combined=True)
+evaluate_grammar('generated_lyrics/', 'grammar scores of generated lyrics/', allow_typos=False, parser=ginger_parser, combined=False)
 
 
 
