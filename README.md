@@ -44,4 +44,4 @@ Rhyming lines score is a number of lines that rhymed with another line within th
 
 ## Additional features
 
-**Grammaticality evaluation**: to be added. 
+**Grammaticality evaluation**: Running the file-iteration.py file runs through the training lyrics in the data folder as well as the generated lyrics files and lists their grammaticality scores in text files located in separate folders. 
