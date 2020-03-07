@@ -38,7 +38,7 @@ def evaluate_grammar(evaluation_dir, results_dir, results_name, allow_typos, par
 
 ginger_parser = GingerIt()
 
-evaluate_grammar('data/', 'grammar scores of originals/',  "another_one", allow_typos=False, parser=ginger_parser, combined=False, sample_size=1000)
+evaluate_grammar('data/', 'grammar scores of originals/',  "grammaticality_scores", allow_typos=False, parser=ginger_parser, combined=False, sample_size=1000)
 
 #evaluate_grammar('generated_lyrics/', 'grammar scores of generated lyrics/', "generator_evaluation", allow_typos=False, parser=ginger_parser, combined=False, sample_size=1000)
 
