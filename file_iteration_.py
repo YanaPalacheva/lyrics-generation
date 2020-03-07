@@ -4,7 +4,7 @@ import os
 
 import csv
 
-from grammar_evaluation import get_grammar_score
+from grammar_evaluation_ import get_grammar_score
 
 
 def evaluate_grammar(evaluation_dir, results_dir, allow_typos, parser, combined, sample_size):
