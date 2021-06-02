@@ -61,7 +61,7 @@ tensorflow-estimator==2.1.0
 termcolor==1.1.0
 Theano==1.0.4
 Unidecode==1.1.1
-urllib3==1.25.7
+urllib3==1.26.5
 web-cache==1.1.0
 Werkzeug==0.16.1
 win-inet-pton==1.1.0
