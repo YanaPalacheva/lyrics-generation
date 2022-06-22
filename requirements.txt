@@ -29,7 +29,7 @@ mkl-service==2.3.0
 multi-key-dict==2.0.3
 nltk==3.4.5
 num2words==0.5.10
-numpy==1.18.1
+numpy==1.22.0
 oauthlib==3.0.1
 opt-einsum==0+untagged.49.gdbede45.dirty
 pandas==1.0.1
